@@ -1,0 +1,527 @@
+# NGINX Documentation Information Architecture Schemas
+
+## F5 NGINX One Console
+
+- About
+- Get started
+- How-to guides
+  - Data plane keys
+    - Create and manage data plane keys
+  - Instances and configurations
+    - Add an NGINX instance
+    - Clean up unavailable NGINX instances
+    - Manage config sync groups
+    - View and edit NGINX configurations
+    - Add a file in a configuration
+  - Config Sync Groups
+    - Manage Config Sync Groups
+  - Containers
+    - Connect NGINX Plus container images to NGINX One
+  - Certificates
+    - Manage certificates
+  - Proxy setup
+    - Set up NGINX as a proxy for NGINX One
+- API
+  - Authentication
+  - API reference guide
+- Glossary
+- Changelog
+
+## NGINX Plus
+
+- Admin Guide
+  - Installing NGINX and NGINX Plus
+    - Installing NGINX Plus
+    - Installing NGINX Open Source
+    - Installing NGINX Plus AMIs on Amazon EC2
+    - Installing NGINX Plus on the Google Cloud Platform
+    - Installing NGINX Plus on Microsoft Azure
+    - Deploying NGINX and NGINX Plus with Docker
+  - Basic Functionality
+    - Controlling NGINX Processes at Runtime
+    - Creating NGINX Plus and NGINX Configuration Files
+  - Load Balancer
+    - HTTP Load Balancing
+    - TCP and UDP Load Balancing
+    - HTTP Health Checks
+    - TCP Health Checks
+    - UDP Health Checks
+    - gRPC Health Checks
+    - Dynamic Configuration of Upstreams with the NGINX Plus API
+    - Accepting the PROXY Protocol
+  - Content Cache
+    - NGINX Content Caching
+  - Web Server
+    - Configuring NGINX and NGINX Plus as a Web Server
+    - Serving Static Content
+    - Authentication Policy
+    - Compression and Decompression
+    - Using NGINX and NGINX Plus as an Application Gateway with uWSGI and Django
+  - Security Controls
+    - NGINX SSL Termination
+    - SSL Termination for TCP Upstream Servers
+    - Restricting Access with HTTP Basic Authentication
+    - Authentication Based on Subrequest Result
+    - Setting up JWT Authentication
+    - Limiting Access to Proxied HTTP Resources
+    - Restricting Access to Proxied TCP Resources
+    - Restricting Access by Geographical Location
+    - Securing HTTP Traffic to Upstream Servers
+    - Securing TCP Traffic to Upstream Servers
+    - Dynamic Denylisting of IP Addresses
+  - Monitoring
+    - Live Activity Monitoring
+    - Configuring Logging
+    - Debugging NGINX
+    - NGINX Diagnostic Package
+    - Monitoring NGINX and NGINX Plus with the New Relic Plug-In
+  - High Availability
+    - High Availability Support for NGINX Plus in On-Premises Deployments
+    - Configuring Active-Active High Availability and Additional Standalone Nodes with keepalived
+    - Synchronizing NGINX Configuration in a Cluster
+    - Runtime State Sharing in a Cluster
+    - How NGINX Plus Performs Zone Synchronization
+  - Dynamic Modules
+    - Brotli
+    - Cookie-Flag
+    - Encrypted-Session
+    - FIPS Status Check
+    - GeoIP
+    - GeoIP2
+    - Headers-More
+    - HTTP Substitutions Filter
+    - Image-Filter
+    - Lua
+    - NGINX Developer Kit
+    - NGINX ModSecurity WAF
+    - njs Scripting Language
+    - OpenTelemetry
+    - OpenTracing
+    - Perl
+    - Phusion Passenger Open Source
+    - Prometheus-njs
+    - RTMP
+    - Set-Misc
+    - SPNEGO
+    - Uninstalling a dynamic module
+    - XSLT
+  - Mail Proxy
+    - Configuring NGINX as a Mail Proxy Server
+- Deployment Guides
+  - Amazon Web Services
+    - Active-Active HA for NGINX Plus on AWS Using AWS Network Load Balancer
+    - Active-Passive HA for NGINX Plus on AWS Using Elastic IP Addresses
+    - Global Server Load Balancing with Amazon Route 53 and NGINX Plus
+    - Using NGINX or NGINX Plus as the Ingress Controller for Amazon Elastic Kubernetes Services
+    - Creating Amazon EC2 Instances for NGINX Open Source and NGINX Plus
+  - Global Server Load Balancing
+    - Global Server Load Balancing with NS1 and NGINX Plus
+  - Google Cloud Platform
+    - All-Active HA for NGINX Plus on the Google Cloud Platform
+  - Load Balancing Third-Party Servers
+    - Load Balancing Apache Tomcat Servers with NGINX Open Source and NGINX Plus
+    - Load Balancing Microsoft Exchange Servers with NGINX Plus
+    - Load Balancing Node.js Application Servers with NGINX Open Source and NGINX Plus
+    - Load Balancing Oracle E-Business Suite with NGINX Plus
+    - Load Balancing Oracle WebLogic Server with NGINX Open Source and NGINX Plus
+    - Load Balancing Wildfly and JBoss Application Servers with NGINX Open Source and NGINX Plus
+  - Microsoft Azure
+    - Active-Active HA for NGINX Plus on Microsoft Azure Using the Azure Standard Load Balancer
+    - Creating Microsoft Azure Virtual Machines for NGINX Open Source and F5 NGINX Plus
+  - Migrate Hardware ADCs
+    - Migrating Load Balancer Configuration from F5 BIG-IP LTM to F5 NGINX Plus
+  - Set Up Single Sign-On for Proxied Applications
+    - Single Sign-On with Amazon Cognito
+    - Single Sign-On With Auth0
+    - Single Sign-On with Keycloak
+    - Single Sign-On with Microsoft Active Directory FS
+    - Single Sign-On with Okta
+    - Single Sign-On with OneLogin
+    - Single Sign-On with Ping Identity
+  - Setting Up an NGINX Demo Environment
+- Releases
+- Technical Specifications
+- Open Source Components
+- NGINX Plus FIPS Compliance
+- NGINX Directives index
+
+## NGINX Instance Manager
+
+- Fundamentals
+  - Technical Specifications
+  - NGINX Instance Manager dashboard
+  - Overview: NGINX Instance Manager REST API
+- Deploy
+  - Docker
+    - Deploy using Docker Compose
+    - Deploy in a single container (demo only)
+    - Deploy NGINX Plus in a container (data plane)
+  - Kubernetes
+    - Deploy using Helm
+    - Configurable Helm settings
+    - Frequently used Helm configurations
+  - Infrastructure as Code
+    - Overview
+    - Install with Ansible
+    - Build and deploy images
+  - Virtual Machine or Bare Metal
+    - Install on a virtual machine or bare metal using a script
+    - Manually install on a virtual machine or bare metal (deprecated)
+- Disconnected environments
+  - Install in a disconnected environment using a script
+  - Manually install in a disconnected environment (deprecated)
+  - Add a license in a disconnected environment
+  - Report usage to F5 in a disconnected environment
+- Platform administration
+  - License and usage reporting
+    - Add a license
+    - Report usage data to F5
+  - Authentication
+    - Basic auth
+      - Set up basic authentication
+    - OIDC
+      - Get started with OIDC
+      - Microsoft Entra: Set up OIDC authentication
+      - Automate OIDC with Microsoft Entra
+      - Keyclock: Set up OIDC authentication
+      - Provision users and groups using SCIM
+  - RBAC
+    - Overview: RBAC
+    - Create and manage roles
+    - Assign roles to users or user groups
+    - Manage resource groups
+  - Maintenance
+    - Back up and restore
+    - Install SQLite (for NGINX Instance Manager 2.14.1 and earlier)
+- System configuration
+  - Configure NGINX Instance Manager with nms.conf
+  - Configure ClickHouse
+  - Configure Vault for storing secrets
+  - Configure SELinux
+  - Configure telemetry and web analytics
+  - Optimize NGINX proxy gateway for large data paths
+  - Secure client access and network traffic
+- Monitoring
+  - Overview: NGINX instance metrics
+  - Query the Metrics API
+  - View events and metrics
+  - Security Monitoring
+    - Deploy
+      - Install or upgrade Security Monitoring
+    - Configure
+      - Set up App Protect instances for Security Monitoring
+      - Give users access to Security Monitoring dashboards
+      - Manage the Security Monitoring database
+      - Update geolocation database used in Security Monitoring dashboards
+    - Releases
+      - Release Notes
+      - Known Issues
+    - Troubleshooting
+- NGINX configs
+  - Stage NGINX configs
+  - Publish NGINX configs
+  - Publish NGINX configs with version control
+  - NGINX config Templates
+    - Overview
+      - About NGINX config templates
+      - F5 Global Default base template
+      - Augment templates
+      - Template resource files
+    - How To
+      - Manage NGINX configs with templates
+      - RBAC for config templates and submissions
+    - Tutorials
+      - Round-robin reverse proxy with an augment template
+- NGINX instances
+  - Scan and discover NGINX instances
+  - Create and manage instance groups
+  - Manage SSL certificates
+  - Organize instances with tags
+  - NGINX App Protect WAF
+    - Manage your App Protect WAF configs
+    - WAF configuration management
+    - NGINX App Protect WAF configuration management
+- Support
+  - Create a support package
+  - Create a support package from a Helm installation
+  - Where to go for support
+- Releases
+  - Release Notes
+  - Known Issues
+
+## NGINX Ingress Controller
+
+- Overview
+  - About
+  - The design of NGINX Ingress Controller
+  - Extensibility with NGINX Plus
+  - Product telemetry
+- Technical specifications
+- Installation
+  - Install NGINX Ingress Controller
+    - Installation with Helm
+    - Installation with Manifests
+    - Installation with NGINX Ingress Operator
+    - Upgrade from NGINX Ingress Controller 4.0.0
+  - NGINX Ingress Controller Images
+    - Get NGINX Ingress Controller from the F5 Registry
+    - Get the NGINX Ingress Controller image with JWT
+  - Create a license Secret
+  - Build NGINX Ingress Controller
+  - Run multiple NGINX Ingress Controllers
+  - Migrate from Ingress-NGINX Controller to NGINX Ingress Controller
+  - Integrations
+    - NGINX App Protect WAF
+      - Build NGINX Ingress Controller with NGINX App Protect WAF
+      - Configuration
+      - Troubleshoot NGINX App Protect WAF
+    - NGINX App Protect WAF v5
+      - Build NGINX Ingress Controller with NGINX App Protect WAF v5
+      - Configuration
+      - Compile NGINX App Protect WAF policies using NGINX Instance Manager
+    - NGINX App Protect DoS
+      - Build NGINX Ingress Controller with NGINX App Protect DoS
+      - Configuration
+      - DoS protection resource specification
+      - Troubleshoot NGINX App Protect DoS
+    - F5 BIG-IP
+    - Open Tracing
+- Configuration
+  - Global configuration
+    - Command-line arguments
+    - GlobalConfig resource
+    - ConfigMap resource
+    - Custom templates
+    - Reporting resource status
+  - Ingress resources
+    - Basic configuration
+    - Advanced configuration with Annotations
+    - Custom annotations
+    - Advanced configuration with Snippets
+    - Cross-namespace configuration
+  - Security recommendations
+  - Configuration examples
+  - Policy resources
+  - TransportServer resources
+  - VirtualServer and VirtualServerRoute resources
+  - Host and Listener collections
+  - Deploy a Policy for access control
+- Logging and Monitoring
+  - Logging
+  - Status Page
+  - Prometheus
+  - Service Insight
+- Troubleshooting
+  - Commercial support
+  - Troubleshooting common issues
+  - Troubleshooting Ingress resources
+  - Troubleshooting Policy resources
+  - Troubleshooting VirtualServer resources
+- Tutorials
+  - Configuring VirtualServer with custom HTTP and HTTPS listener ports
+  - Connect NGINX App Protect WAF to NGINX Security Monitoring
+  - Customer OIDC Configuration with NGINX Ingress Controller
+  - Customizing NGINX Ingress Controller Ports
+  - Ingresses Path Matching Using Path-Regex Annotation
+  - NGINX Ingress Controller and Istio Service Mesh
+  - NGINX Ingress Controller and Linkerd
+  - NGINX Ingress Controller and Open Service Mesh
+  - Using NGINX Ingress Controller with NGINX Dynamic Modules
+- Releases
+- Community and contributing
+- Glossary
+
+# NGINX Gateway Fabric
+
+- Overview
+  - Gateway architecture
+  - Gateway API Compatibility
+  - Advanced features with NGINX Plus
+  - Resource validation
+  - Product telemetry
+  - Custom policies
+- Get started
+- Installation
+  - Install NGINX Gateway Fabric
+    - Installation with Helm
+    - Installation with Kubernetes manifest
+  - NGINX Plus image and JWT requirement
+  - Build NGINX Gateway Fabric and NGINX Images
+- How-to guides
+  - Traffic management
+    - Routing traffic to applications
+    - Application routes using HTTP matching conditions
+    - Secure traffic using Let's Encrypt and cert -manager
+    - HTTP redirects and rewrites
+    - Modify HTTP request and response headers
+    - HTTPS termination
+    - Securing backend traffic
+    - Client settings policy API
+    - TLS Passthrough
+    - Use the SnippetsFilter API
+  - Monitoring and troubleshooting
+    - Prometheus metrics
+    - Tracing
+    - NGINX Plus dashboard
+    - Troubleshooting
+  - Control plane configuration
+  - Data plane configuration
+  - Upgrade applications without downtime
+- Reference
+  - API reference
+  - Command-line reference guide
+  - Technical specifications
+- Support
+- Releases
+
+# NGINX Agent
+
+- Overview
+- Technical specifications
+- Installation and upgrade
+  - Getting started
+  - Installation from GitHub release
+  - Installation from NGINX repository
+  - Installation from NGINX Plus repository
+  - Upgrade NGINX Agent package
+  - Uninstall NGINX Agent package
+  - Container environments
+    - Build container images
+    - Container support and troubleshooting
+- Configuration
+  - Basic configuration
+  - Features configuration
+  - Encrypt communication
+  - Add NGINX users to nginx-agent Group
+  - Health checks
+- Contribute
+  - Community and contribution
+  - Development environment setup
+- Changelog
+
+# F5 NGINX App Protect WAF
+
+- Version 4 and Earlier
+  - Administration Guides
+    - NGINX App Protect WAF Administration Guide
+    - Using NGINX App Protect WAF with NGINX Management Suite
+    - Upgrade NGINX App Protect WAF on Managed Instances
+  - Configuration Guides
+    - NGINX App Protect WAF Configuration Guide
+  - Declarative Policy
+    - NGINX App Protect WAF Declarative Policy
+  - Logging Overview
+    - NGINX App Protect WAF Logs Overview
+    - NGINX App Protect WAF Security Log
+    - NGINX App Protect WAF Operation Log
+    - NGINX App Protect WAF Debug Log
+    - NGINX App Protect WAF Access Log
+  - Troubleshooting Guide
+    - NGINX App Protect WAF Troubleshooting Guide
+  - Releases
+- Version 5
+  - Administration Guides
+    - NGINX App Protect WAF Administration Guide
+    - Deploying NGINX App Protect WAF on Docker
+    - Deploying NGINX App Protect WAF on Kubernetes
+    - NGINX App Protect WAF Compiler
+    - Upgrade NGINX App Protect WAF on Managed Instances
+    - Installing NGINX App Protect WAF
+  - Configuration Guides
+    - NGINX App Protect WAF Configuration Guide
+  - Declarative Policy
+    - NGINX App Protect WAF Declarative Policy
+  - Logging Overview
+    - NGINX App Protect WAF Security Log
+    - NGINX App Protect WAF Access Log
+    - NGINX App Protect WAF Logs Overview
+  - Troubleshooting
+    - NGINX App Protect WAF Troubleshooting Guide
+  - Releases
+
+
+# F5 NGINX App Protect DoS
+
+- F5 NGINX App Protect DoS
+  - Deployment Guide
+    - NGINX App Protect DoS Deployment
+    - NGINX App Protect WAF + DoS AMIs on Amazon EC2
+  - Directives and Policy
+    - NGINX App Protect DoS Directives and Policy
+  - Monitoring
+    - NGINX App Protect DoS Logs Overview
+    - NGINX App Protect DoS Live Activity Monitoring
+    - NGINX App Protect DoS Security Log
+    - NGINX App Protect DoS Access Log Request Mechanism
+    - NGINX App Protect DoS Operation Log
+  - Troubleshooting Guide
+    - NGINX App Protect DoS Troubleshooting Guide
+  - Releases
+
+## NGINX as a Service for Azure
+
+- Overview
+  - Overview and architecture
+  - Feature comparison
+- Getting started
+  - Prerequisites
+    - Create a deployment
+      - Deploy using the Azure portal
+      - Deploy using the Azure CLI
+      - Deploy using Terraform
+    - Assign Managed Identities
+    - Add SSL‑TLS certificates
+      - Overview
+      - Add certificates using the Azure portal
+      - Add certificates using the Azure CLI
+      - Add certificates using Terraform
+    - Upload an NGINX configuration
+      - Overview
+      - Upload using the Azure portal
+      - Upload using the Azure CLI
+      - Upload using Terraform
+- NGINX App Protect WAF (Preview)
+  - Enable App Protect WAF
+  - Configure App Protect WAF
+  - Enable App Protect WAF Logs
+  - Disable App Protect WAF
+- Logging and monitoring
+  - Enable monitoring
+  - Configure alerts
+  - Enable NGINX logs
+    - Enable NGINX logs using Azure Portal
+    - Enable NGINX logs using CLI
+    - Enable NGINX logs using Terraform
+  - Metrics catalog
+- Marketplace billing
+  - Billing overview
+  - Usage and cost estimator
+- Client tools
+  - Azure Resource Manager templates
+  - Azure SDK
+- Quickstart guides
+  - Runtime State Sharing
+  - Scaling guidance
+  - Upgrade channels
+  - Enable content caching
+  - Hosting static content
+  - Set up NGINXaaS Loadbalancer for Kubernetes
+  - Enable rate limiting
+  - Use the njs Scripting language
+  - Recreating a deployment
+  - Security controls
+    - Use a certificate from Azure Key Vault
+    - Restricting access with HTTP basic authentication
+    - Setting up JWT authentication
+    - Securing upstream traffic
+    - Set up OIDC authentication
+    - Connect to upstreams with Azure Private Link
+    - GeoIP2
+- Troubleshooting
+  - Get help
+- Frequently Asked Questions
+- Changelog
+  - Changelog archive
+    - 2023
+    - 2022
+- Known issues
