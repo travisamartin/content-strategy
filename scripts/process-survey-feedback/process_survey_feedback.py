@@ -2,7 +2,8 @@
 # 1. Cleaning the dataset (removing unnecessary columns and rows).
 # 2. Extracting and standardizing product names based on URLs.
 # 3. Extracting document names from URLs.
-# 4. Saving the processed data to a new Excel file.
+# 4. Ensuring the Q1 column is formatted as numbers.
+# 5. Saving the processed data to a new Excel file.
 
 # How to Use:
 # 1. Save this script to a file, e.g., `process_survey_feedback.py`.
@@ -76,11 +77,15 @@ def process_nginx_feedback(input_file, output_file):
     df = df.drop(columns=columns_to_delete, errors='ignore')  # Remove specified columns
     df = df.iloc[53:]  # Remove rows 1-53 (0-based index)
 
-    # Step 2: Extract product and document names based on the 'current_url' column
+    # Step 2: Ensure Q1 column is formatted as numbers
+    if "Q1" in df.columns:
+        df["Q1"] = pd.to_numeric(df["Q1"], errors="coerce")
+
+    # Step 3: Extract product and document names based on the 'current_url' column
     df["Product"] = df["current_url"].apply(extract_product)
     df["Document"] = df["current_url"].apply(extract_doc)
     
-    # Step 3: Save the cleaned and updated dataset
+    # Step 4: Save the cleaned and updated dataset
     df.to_excel(output_file, index=False)
 
 if __name__ == "__main__":
