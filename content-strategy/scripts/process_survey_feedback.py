@@ -34,6 +34,7 @@ PRODUCT_MAPPING = {
     "nginx-app-protect-waf": "NGINX App Protect WAF",
     "nginx-app-protect-dos": "NGINX App Protect DoS",
     "nginxaas/azure": "NGINX as a Service for Azure",
+    "nginx-amplify": "NGINX Amplify",
 }
 
 def extract_product(url):
