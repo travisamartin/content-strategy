@@ -78,10 +78,12 @@ The CSV file is used to specify which NGINX documentation sets to inventory.
 You can **edit this file** to add or remove doc sets before running the script.
 
 ### **Columns:**
+
 - **`Title`** → The name of the documentation set
 - **`URL`** → The base URL of the documentation set
 
 ### **Example CSV Data:**
+
 | Title                        | URL                                             |
 |------------------------------|-------------------------------------------------|
 | NGINX Agent                  | https://docs.nginx.com/nginx-agent/            |
@@ -96,6 +98,7 @@ You can **edit this file** to add or remove doc sets before running the script.
 | NGINX Plus                   | https://docs.nginx.com/nginx/                  |
 
 ### **Customizing the Inventory**
+
 - To **exclude** a doc set, **remove** its row from `doc-set-base-links.csv`.
 - To **include** a new doc set, **add** a new row with the doc set name and base URL.
 - Ensure the CSV **does not contain extra spaces or missing headers** before running the script.
