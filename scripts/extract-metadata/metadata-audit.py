@@ -5,10 +5,11 @@ import os
 import yaml
 import pandas as pd
 from datetime import datetime
+from openpyxl import Workbook
 
 def remove_timezone(dt_value):
     """
-    Return dt_value with no time zone information.
+    Return the datetime value without a time zone.
     """
     if isinstance(dt_value, datetime) and dt_value.tzinfo is not None:
         return dt_value.replace(tzinfo=None)
@@ -16,65 +17,62 @@ def remove_timezone(dt_value):
 
 def build_repo_content_path(file_path, content_dir):
     """
-    Construct a path of the form /<repoName>/<contentDir>... that
-    starts at the parent repo name, then the content directory name,
-    then any subfolders or files under that path.
+    Build a path that starts with /<repoName>/<contentFolder>. 
+    For example: /docs/content/ or /documentation/content/.
     """
-    # Convert content_dir to an absolute path
+    # Convert the content directory to an absolute path
     content_dir_abs = os.path.abspath(content_dir)
 
-    # Determine the repo name from the folder that contains content_dir
+    # The folder that contains the content directory is the repo name
     repo_name = os.path.basename(os.path.dirname(content_dir_abs))
 
-    # Determine the content folder name (often 'content')
+    # The name of the content folder (often 'content')
     content_folder = os.path.basename(content_dir_abs)
 
-    # Build something like "/docs/content" or "/documentation/content"
+    # Construct something like "/repoName/contentFolder"
     prefix = f"/{repo_name}/{content_folder}"
 
-    # Compute a relative path from content_dir to the file
+    # Find the path of file_path relative to the content directory
     rel_path = os.path.relpath(file_path, content_dir_abs)
 
-    # Combine the prefix with the relative path
+    # Join prefix with the relative path, then replace any backslashes
     joined = os.path.join(prefix, rel_path)
-
-    # Replace backslashes with forward slashes (for Windows compatibility)
     return joined.replace("\\", "/")
 
 def parse_frontmatter(file_path, content_dir):
     """
-    Open the file, check if front matter exists, parse it, 
-    rename 'title' to 'Title', and remove time zone info from date fields.
+    Open the file, look for front matter, rename 'title' to 'Title', 
+    remove time zones, and return the metadata in a dictionary.
     """
-    # Build the dynamic path string for the "file" field
+    # Build the path that starts with the repo name and content folder
     final_path = build_repo_content_path(file_path, content_dir)
 
     try:
+        # Read the file
         with open(file_path, 'r', encoding='utf-8') as f:
             raw_content = f.read()
 
-        # If the file doesn't start with '---', there's no front matter
+        # If there's no opening '---', record no metadata
         if not raw_content.startswith('---'):
             return {"file": final_path, "No metadata found": True}
 
-        # Split on '---'; we expect at least 3 parts (start, front matter, rest)
+        # Split on '---'; we expect three parts for valid front matter
         parts = raw_content.split('---', 2)
         if len(parts) < 3:
             return {"file": final_path, "Error in frontmatter": True}
 
         frontmatter_str = parts[1]
         try:
-            # Use YAML to parse the front matter
+            # Parse the YAML
             data = yaml.safe_load(frontmatter_str) or {}
         except yaml.YAMLError:
-            # If parsing fails, return an error
             return {"file": final_path, "Error in frontmatter": True}
 
-        # If the front matter is empty, note that there's no metadata
+        # If the parsed front matter is empty, record no metadata
         if not data:
             return {"file": final_path, "No metadata found": True}
 
-        # Rename 'title' to 'Title' and remove any time zone info
+        # Rename 'title' to 'Title' and remove any time zone data
         for key, value in list(data.items()):
             if key.lower() == 'title':
                 data['Title'] = remove_timezone(value)
@@ -82,27 +80,34 @@ def parse_frontmatter(file_path, content_dir):
             else:
                 data[key] = remove_timezone(value)
 
-        # Store the final file path in the data dictionary
+        # Add the file path
         data["file"] = final_path
         return data
 
     except Exception as e:
-        # If something unexpected happens while reading the file
+        # Record any unexpected error as front matter error
         return {"file": final_path, "Error in frontmatter": str(e)}
 
 def main():
     """
-    Main entry point: scan the given content directory for Markdown files,
-    parse front matter, create a spreadsheet, and print a summary.
+    Walk the specified content directory for Markdown files. 
+    Parse front matter, build an Excel file, and print a summary.
     """
     if len(sys.argv) < 2:
         print("Usage: python3 metadata-audit.py /path/to/<repo>/content/")
         sys.exit(1)
 
     content_dir = sys.argv[1]
+
+    # Build the string used in the Excel header, like "/docs/content/"
+    content_dir_abs = os.path.abspath(content_dir)
+    repo_name = os.path.basename(os.path.dirname(content_dir_abs))
+    content_folder = os.path.basename(content_dir_abs)
+    repo_content_path = f"/{repo_name}/{content_folder}/"
+
     all_metadata = []
 
-    # Walk through the content directory and find .md files
+    # Recursively scan the content directory for .md files
     for root, _, files in os.walk(content_dir):
         for filename in files:
             if filename.lower().endswith('.md'):
@@ -110,37 +115,45 @@ def main():
                 frontmatter_data = parse_frontmatter(file_path, content_dir)
                 all_metadata.append(frontmatter_data)
 
-    # Convert the collected dictionaries to a Pandas DataFrame
+    # Convert collected records into a DataFrame
     df = pd.DataFrame(all_metadata)
 
-    # Make sure the 'file' and 'Title' columns always exist
+    # Ensure "file" and "Title" columns exist
     if 'file' not in df.columns:
         df['file'] = ""
     if 'Title' not in df.columns:
         df['Title'] = ""
 
-    # Place 'file' in column A, 'Title' in column B, sort the remaining columns
+    # Place 'file' in column A, 'Title' in column B, then sort other columns
     fixed_order = ['file', 'Title']
     other_cols = sorted(col for col in df.columns if col not in fixed_order)
     df = df[fixed_order + other_cols]
 
-    # Sort rows by file ascending, then Title ascending
+    # Sort the rows by file path, then title
     df.sort_values(by=['file', 'Title'], ascending=[True, True], inplace=True)
 
-    # Write to an Excel file
     output_file = "metadata_audit.xlsx"
-    df.to_excel(output_file, index=False)
 
-    # Print a summary of the process
+    # Write the DataFrame to the Excel file, starting on row 4
+    with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+        # Start the data on row 4
+        df.to_excel(writer, index=False, startrow=3, sheet_name='Sheet1')
+        sheet = writer.sheets['Sheet1']
+
+        # Row 1: show the repo path
+        sheet['A1'] = f"Repo path: {repo_content_path}"
+        # Row 2: show the current date
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        sheet['A2'] = f"Date: {today_str}"
+        # Row 3 is blank
+
+    # Compute summary info
     total_files = len(df)
-    # Count how many files had "No metadata found"
     no_metadata_count = df['No metadata found'].sum() if 'No metadata found' in df.columns else 0
-    # Count how many files had "Error in frontmatter"
-    error_count = 0
-    if 'Error in frontmatter' in df.columns:
-        error_count = df['Error in frontmatter'].notna().sum()
+    error_count = df['Error in frontmatter'].notna().sum() if 'Error in frontmatter' in df.columns else 0
     valid_count = total_files - no_metadata_count - error_count
 
+    # Print summary
     print(f"Scanned {total_files} Markdown files.")
     print(f"{valid_count} had front matter.")
     print(f"{no_metadata_count} had no metadata.")
