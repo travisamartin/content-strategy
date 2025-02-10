@@ -33,18 +33,19 @@ pip install pyyaml pandas openpyxl
 
 ## What the script does
 
-1. Finds `.md` files under the `content` folder.  
-2. Checks each file for front matter delimited by `---`.  
-3. Extracts front matter as metadata, renames “title” to “Title,” and removes time zone info.  
-4. Creates a spreadsheet (`metadata_audit.xlsx`) with the findings.  
+1. Finds `.md` files under the content folder.
+2. Checks each file for front matter at the very start, delimited by `---`.
+3. Extracts any keys from the front matter and removes time zone info from date fields.
+4. Creates a spreadsheet (`metadata_audit_<timestamp>.xlsx`) with the findings.
 
 ## What the script writes
 
-- **file** (column A)  
-  - A path of this form: `/<repoName>/content/...`  
-- **Title** (column B)  
-- Other columns for any metadata fields, sorted alphabetically.  
-- Rows sorted by the **file** path, then **Title**.
+- **file** (column A)
+  - A path of this form: `/<repoName>/content/...`
+- **title** (column B)
+- **Title** (column C)
+- Any other metadata keys, sorted alphabetically after those three.
+- Rows are sorted by the file path only.
 
 ## Troubleshooting
 
