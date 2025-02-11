@@ -1,6 +1,6 @@
 ## Script details
 
-This script scans Markdown files in a Hugo-style folder for front matter. It removes any time zones from date fields and renames “title” to “Title.” It writes the results to an Excel file named `metadata_audit.xlsx` and prints a summary of its work.
+This script scans Markdown files in a Hugo-style folder for front matter and writes the results to an Excel file named `metadata_audit_<timestamp>.xlsx`.
 
 ## Things you need
 
