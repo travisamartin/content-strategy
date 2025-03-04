@@ -6,6 +6,7 @@ Cleans and transforms an Excel file for use in Tableau. This script:
 - Removes rows where 'Link URL' is missing.
 - Removes rows where the 'Q2' column contains the word 'testing'.
 - Cleans the 'Link URL' column by removing anchors (#) and adding a trailing slash.
+- Replaces 'https://docs.nginx.com/nginxaas-azure/known-issues/' with 'https://docs.nginx.com/nginxaas/azure/known-issues/'.
 - Reverse-geocodes latitude/longitude into Country, City, and State columns.
 - Respects the Nominatim rate limit of about 1 request per second.
 
@@ -118,8 +119,9 @@ def clean_url(url):
 
 def update_urls(data):
     """
-    Applies 'clean_url' to each value in the 'Link URL' column.
-    Logs each change.
+    1. Cleans 'Link URL' by removing anchor fragments and ensuring a trailing slash.
+    2. Replaces 'https://docs.nginx.com/nginxaas-azure/known-issues/' with 'https://docs.nginx.com/nginxaas/azure/known-issues/'.
+    3. Logs each change, including the special replacement.
     """
     if 'Link URL' not in data.columns:
         logging.error("Column 'Link URL' not found in the data. No URL updates performed.")
@@ -130,10 +132,27 @@ def update_urls(data):
     def update(row):
         nonlocal updated_count
         old = row['Link URL']
+        
+        # Step 1: Clean URL
         new = clean_url(old)
+
+        # Step 2: Replace the old pattern with the new one
+        if "https://docs.nginx.com/nginxaas-azure/known-issues/" in new:
+            replaced = new.replace(
+                "https://docs.nginx.com/nginxaas-azure/known-issues/",
+                "https://docs.nginx.com/nginxaas/azure/known-issues/"
+            )
+            if replaced != new:
+                updated_count += 1
+                logging.info(f"Row {row.name}: Link URL updated from {new} to {replaced}")
+                print(f"Row {row.name}: Link URL updated from {new} to {replaced}")
+            new = replaced
+        
+        # If the final URL differs from the original, log it
         if new != old:
             updated_count += 1
             logging.info(f"Row {row.name}: Link URL updated from {old} to {new}")
+
         return new
 
     data['Link URL'] = data.apply(update, axis=1)
@@ -189,7 +208,7 @@ def main():
       1. Load data and fix headers.
       2. Remove rows without 'Link URL'.
       3. Remove rows with 'testing' in Q2.
-      4. Clean 'Link URL' values.
+      4. Clean 'Link URL' values, including special replacement for 'nginxaas-azure'.
       5. Reverse-geocode lat/long into Country, City, State.
       6. Write the final DataFrame to an Excel file.
     """
