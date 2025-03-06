@@ -331,7 +331,7 @@
 - Community and contributing
 - Glossary
 
-# NGINX Gateway Fabric
+## NGINX Gateway Fabric
 
 - Overview
   - Gateway architecture
@@ -374,7 +374,7 @@
 - Support
 - Releases
 
-# NGINX Agent
+## NGINX Agent
 
 - Overview
 - Technical specifications
@@ -399,7 +399,7 @@
   - Development environment setup
 - Changelog
 
-# F5 NGINX App Protect WAF
+## F5 NGINX App Protect WAF
 
 - Version 4 and Earlier
   - Administration Guides
@@ -439,24 +439,22 @@
     - NGINX App Protect WAF Troubleshooting Guide
   - Releases
 
+## F5 NGINX App Protect DoS
 
-# F5 NGINX App Protect DoS
-
-- F5 NGINX App Protect DoS
-  - Deployment Guide
-    - NGINX App Protect DoS Deployment
-    - NGINX App Protect WAF + DoS AMIs on Amazon EC2
-  - Directives and Policy
-    - NGINX App Protect DoS Directives and Policy
-  - Monitoring
-    - NGINX App Protect DoS Logs Overview
-    - NGINX App Protect DoS Live Activity Monitoring
-    - NGINX App Protect DoS Security Log
-    - NGINX App Protect DoS Access Log Request Mechanism
-    - NGINX App Protect DoS Operation Log
-  - Troubleshooting Guide
-    - NGINX App Protect DoS Troubleshooting Guide
-  - Releases
+- Deployment Guide
+  - NGINX App Protect DoS Deployment
+  - NGINX App Protect WAF + DoS AMIs on Amazon EC2
+- Directives and Policy
+  - NGINX App Protect DoS Directives and Policy
+- Monitoring
+  - NGINX App Protect DoS Logs Overview
+  - NGINX App Protect DoS Live Activity Monitoring
+  - NGINX App Protect DoS Security Log
+  - NGINX App Protect DoS Access Log Request Mechanism
+  - NGINX App Protect DoS Operation Log
+- Troubleshooting Guide
+  - NGINX App Protect DoS Troubleshooting Guide
+- Releases
 
 ## NGINX as a Service for Azure
 
