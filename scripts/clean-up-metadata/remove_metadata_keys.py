@@ -6,7 +6,7 @@ import time
 import yaml
 import logging
 
-# Keys to remove completely (not renamed).
+# Keys we remove outright (not renamed).
 UNNEEDED_KEYS = [
     "_build",
     "aliases",
@@ -76,7 +76,7 @@ def merge_categories_and_doctypes(front_matter_data, logger):
     categories_value = front_matter_data.pop("categories", None)
     doctypes_value = front_matter_data.pop("doctypes", None)
 
-    # If neither 'categories' nor 'doctypes' is present, there's nothing to do.
+    # If neither 'categories' nor 'doctypes' is present, nothing to do.
     if categories_value is None and doctypes_value is None:
         return
 
@@ -131,10 +131,21 @@ def remove_unneeded_keys(front_matter_data):
             del front_matter_data[key]
     return removed
 
+def ensure_description_period(front_matter_data):
+    """
+    If the 'description' key is a string, ensure it ends with a period ('.').
+    """
+    if "description" in front_matter_data and isinstance(front_matter_data["description"], str):
+        desc = front_matter_data["description"].rstrip()
+        if not desc.endswith("."):
+            desc += "."
+        front_matter_data["description"] = desc
+
 def process_file(filepath, logger):
     """
     Reads a file, parses its front matter, merges categories/doctypes,
-    filters type values, removes unneeded keys, and writes updates if needed.
+    filters type values, ensures description ends with a period,
+    removes unneeded keys, and writes updates if needed.
     Logs all activity.
     """
     with open(filepath, "r", encoding="utf-8") as f:
@@ -170,6 +181,9 @@ def process_file(filepath, logger):
     # Filter out invalid 'type' values.
     filter_type_values(front_matter_data, logger)
 
+    # Ensure description ends with a period.
+    ensure_description_period(front_matter_data)
+
     # Remove any keys we don't want.
     removed_keys = remove_unneeded_keys(front_matter_data)
 
@@ -181,22 +195,23 @@ def process_file(filepath, logger):
         if not front_matter_data:
             logger.error(f"All keys removed in {filepath}, keeping empty front matter block.")
 
-        # Dump the updated YAML (with Unicode allowed).
+        # Dump the updated YAML, removing trailing blank lines.
         updated_front_matter_text = yaml.safe_dump(
             front_matter_data,
             sort_keys=False,
             allow_unicode=True
         ).strip()
 
-        # Rebuild the file with updated front matter.
+        # Add exactly one blank line after the front matter block, 
+        # then strip leading whitespace from the existing content.
         new_content = (
             f"{before_front_matter}---\n"
             f"{updated_front_matter_text}\n"
-            f"---\n"
-            f"{after_front_matter}"
+            f"---\n\n"  # <-- Ensures exactly one blank line.
+            f"{after_front_matter.lstrip()}"
         )
 
-        # Write the changes.
+        # Write out the changes.
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(new_content)
 
