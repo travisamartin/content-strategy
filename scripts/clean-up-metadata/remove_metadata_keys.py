@@ -6,17 +6,15 @@ import time
 import yaml
 import logging
 
-# These are the metadata keys we remove from each file's front matter.
+# Keys to remove completely (not renamed).
 UNNEEDED_KEYS = [
     "_build",
     "aliases",
     "display_breadcrumb",
     "linkTitle",
     "menu",
-    "categories",
     "catalog",
     "catalogType",
-    "doctypes",
     "journeys",
     "tags",
     "authors",
@@ -24,10 +22,19 @@ UNNEEDED_KEYS = [
     "versions"
 ]
 
+# The only allowed values for 'type'.
+VALID_TYPE_VALUES = {
+    "tutorial",
+    "how-to",
+    "concept",
+    "reference",
+    "getting-started",
+    "redoc"
+}
+
 def setup_logger():
     """
-    Creates a logger that writes to a file and to the console.
-    Names the log file with a timestamp so it's easy to track each run.
+    Creates a logger that writes to a timestamped file and to the console.
     """
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     log_filename = f"metadata_cleanup_{timestamp}.log"
@@ -38,74 +45,150 @@ def setup_logger():
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s"
     )
+
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     console_handler.setFormatter(console_formatter)
-    logging.getLogger().addHandler(console_handler)
 
+    logging.getLogger().addHandler(console_handler)
     return logging.getLogger()
 
-def remove_keys_from_front_matter(front_matter_data):
+def to_list(value):
     """
-    Removes unneeded keys from the parsed YAML dictionary.
-    Returns a list of keys actually removed.
+    Returns a list version of the input value.
+    If the value is already a list, returns it as is.
+    If it's a string, returns a single-element list.
+    Otherwise, returns an empty list.
     """
-    removed_keys = []
+    if isinstance(value, list):
+        return value
+    elif isinstance(value, str):
+        return [value]
+    return []
+
+def merge_categories_and_doctypes(front_matter_data, logger):
+    """
+    Merges 'categories' and 'doctypes' into a single 'type' list.
+    Converts single strings to lists, merges them,
+    then replaces 'task'/'tasks' with 'how-to' and 'concepts' with 'concept'.
+    """
+    categories_value = front_matter_data.pop("categories", None)
+    doctypes_value = front_matter_data.pop("doctypes", None)
+
+    # If neither 'categories' nor 'doctypes' is present, there's nothing to do.
+    if categories_value is None and doctypes_value is None:
+        return
+
+    categories_list = to_list(categories_value)
+    doctypes_list = to_list(doctypes_value)
+    combined = categories_list + doctypes_list
+
+    converted = []
+    for item in combined:
+        # Replace tasks with how-to
+        if item in ["task", "tasks"]:
+            converted.append("how-to")
+        # Replace concepts with concept
+        elif item == "concepts":
+            converted.append("concept")
+        else:
+            converted.append(item)
+
+    front_matter_data["type"] = converted
+
+def filter_type_values(front_matter_data, logger):
+    """
+    Keeps only allowed values in 'type'. Removes anything else and logs what was removed.
+    This also discards non-string items to avoid errors when joining.
+    """
+    if "type" not in front_matter_data:
+        return
+
+    # Discard anything that's not a string.
+    original_type_list = [x for x in front_matter_data["type"] if isinstance(x, str)]
+
+    # Keep only items in VALID_TYPE_VALUES.
+    filtered = [x for x in original_type_list if x in VALID_TYPE_VALUES]
+
+    # Determine which items were removed and log them.
+    removed_items = set(original_type_list) - set(filtered)
+    if removed_items:
+        removed_items_str = ", ".join(str(item) for item in removed_items)
+        logger.info(f"Filtered out invalid type values: {removed_items_str}")
+
+    front_matter_data["type"] = filtered
+
+def remove_unneeded_keys(front_matter_data):
+    """
+    Removes keys in UNNEEDED_KEYS from the front matter data.
+    Returns a list of removed keys for logging.
+    """
+    removed = []
     for key in UNNEEDED_KEYS:
         if key in front_matter_data:
-            removed_keys.append(key)
+            removed.append(key)
             del front_matter_data[key]
-    return removed_keys
+    return removed
 
 def process_file(filepath, logger):
     """
-    Reads a file, locates its front matter, removes unneeded keys,
-    and writes changes if needed. Logs each step.
+    Reads a file, parses its front matter, merges categories/doctypes,
+    filters type values, removes unneeded keys, and writes updates if needed.
+    Logs all activity.
     """
-    # Read the entire file.
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Split on the first two '---' markers to find the front matter section.
+    # Split content based on the front matter markers.
     parts = content.split("---")
     if len(parts) < 3:
-        # No or malformed front matter, so we won't alter this file.
         logger.info(f"No valid front matter in {filepath}, skipping.")
         return
 
-    # The first part is everything before the front matter.
     before_front_matter = parts[0]
-    # The second part is the front matter.
     front_matter_text = parts[1]
-    # The remainder is everything after the front matter.
     after_front_matter = "---".join(parts[2:])
 
     # Parse the front matter as YAML.
     try:
-        front_matter_data = yaml.safe_load(front_matter_text)
-        # If it's not a dictionary, it's not valid.
+        front_matter_data = yaml.safe_load(front_matter_text) or {}
         if not isinstance(front_matter_data, dict):
             logger.info(f"Front matter not a dictionary in {filepath}, skipping.")
             return
     except yaml.YAMLError as e:
-        # Log and skip if the front matter isn't valid YAML.
         logger.error(f"YAML parse error in {filepath}: {e}")
         return
 
-    # Remove the unneeded keys from the front matter.
-    removed_keys = remove_keys_from_front_matter(front_matter_data)
+    # Track if categories/doctypes keys existed (for logging).
+    had_categories = "categories" in front_matter_data
+    had_doctypes = "doctypes" in front_matter_data
 
-    # If we removed any keys, rewrite the file.
-    if removed_keys:
-        # If the front matter is now empty, log an error but keep the block.
+    # Merge categories/doctypes into 'type'.
+    merge_categories_and_doctypes(front_matter_data, logger)
+
+    # Filter out invalid 'type' values.
+    filter_type_values(front_matter_data, logger)
+
+    # Remove any keys we don't want.
+    removed_keys = remove_unneeded_keys(front_matter_data)
+
+    # Determine if we made changes.
+    changed = bool(removed_keys or had_categories or had_doctypes)
+
+    if changed:
+        # If we removed everything, log an error but keep an empty block.
         if not front_matter_data:
             logger.error(f"All keys removed in {filepath}, keeping empty front matter block.")
 
-        # Re-dump the YAML with safe_dump. This also removes empty structures.
-        updated_front_matter_text = yaml.safe_dump(front_matter_data, sort_keys=False).strip()
+        # Dump the updated YAML (with Unicode allowed).
+        updated_front_matter_text = yaml.safe_dump(
+            front_matter_data,
+            sort_keys=False,
+            allow_unicode=True
+        ).strip()
 
-        # Construct the updated file content.
+        # Rebuild the file with updated front matter.
         new_content = (
             f"{before_front_matter}---\n"
             f"{updated_front_matter_text}\n"
@@ -113,22 +196,26 @@ def process_file(filepath, logger):
             f"{after_front_matter}"
         )
 
-        # Overwrite the file with the changes.
+        # Write the changes.
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(new_content)
 
-        # Log which keys were removed.
-        removed_keys_list = ", ".join(removed_keys)
-        logger.info(f"Removed keys [{removed_keys_list}] from {filepath}")
+        msgs = []
+        if removed_keys:
+            msgs.append(f"Removed keys: {', '.join(removed_keys)}")
+        if had_categories or had_doctypes:
+            msgs.append("Merged categories/doctypes into 'type'")
+        logger.info(f"{filepath}: {'; '.join(msgs)}")
+    else:
+        logger.info(f"No changes in {filepath}")
 
 def main():
     """
-    Collects the target directory from the command line and
-    processes each .md file inside it.
+    Expects a single command-line argument for the path to the content directory.
+    Walks the directory, processes each .md file, and logs progress.
     """
     if len(sys.argv) < 2:
-        print("Run this script with:")
-        print("python remove_metadata_keys.py <content_directory>")
+        print("Usage: python remove_metadata_keys.py <content_directory>")
         sys.exit(1)
 
     content_dir = sys.argv[1]
@@ -136,18 +223,17 @@ def main():
         print(f"{content_dir} is not a directory.")
         sys.exit(1)
 
-    # Create the logger to record all changes and errors.
     logger = setup_logger()
-    logger.info(f"Starting metadata clean up in {content_dir}")
+    logger.info(f"Starting metadata cleanup in {content_dir}")
 
-    # Recursively walk the directory to find Markdown files.
+    # Recursively walk the directory and process Markdown files.
     for root, dirs, files in os.walk(content_dir):
         for file in files:
             if file.lower().endswith(".md"):
                 filepath = os.path.join(root, file)
                 process_file(filepath, logger)
 
-    logger.info("Clean up complete.")
+    logger.info("Cleanup complete.")
 
 if __name__ == "__main__":
     main()
