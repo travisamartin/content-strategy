@@ -1,0 +1,13 @@
+filepath, url
+/content/agent/, https://docs.nginx.com/nginx-agent/
+/content/amplify/, https://docs.nginx.com/nginx-amplify/
+/content/nap-dos/, https://docs.nginx.com/nginx-app-protect-dos/
+/content/nap-waf/, https://docs.nginx.com/nginx-app-protect-waf/
+/content/ngf/, https://docs.nginx.com/nginx-gateway-fabric/
+/content/nginx/, https://docs.nginx.com/nginx/
+/content/nginx-one/, https://docs.nginx.com/nginx-one/
+/content/nginxaas-azure/, https://docs.nginx.com/nginxaas/azure/
+/content/nim/, https://docs.nginx.com/nginx-instance-manager/
+/content/solutions/, https://docs.nginx.com/solutions/
+/content/controller/, https://docs.nginx.com/nginx-controller/
+/content/mesh/, https://docs.nginx.com/nginx-service-mesh/
