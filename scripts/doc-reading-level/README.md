@@ -15,7 +15,7 @@ A simple Python script that walks through a directory of Markdown files, calcula
 Installation
 
 1. Save the script as `reading_level.py`.
-2.	Install dependencies (see Requirements).
+2. Install dependencies (see Requirements).
 
 ## Usage
 
