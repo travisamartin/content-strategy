@@ -3,7 +3,7 @@
 inventory.py
 
 Scan nginx.org xml docs under xml/<lang>/docs and save an Excel inventory
-with columns auto-fit to their contents.
+with file, title, link, and last commit, plus auto-fit columns.
 
 Requirements:
     • Python 3.6 or later
@@ -25,17 +25,16 @@ import xml.etree.ElementTree as ET
 import re
 import html
 import pandas as pd
-
 from openpyxl.utils import get_column_letter
 
-# list of language codes to include
+# language codes to include
 LANG_CODES = ["cn", "en", "he", "it", "ja", "ru", "tr"]
 
 
 def get_last_commit_date(repo_path, file_path):
     """
     Return the ISO date of the last git commit for file_path.
-    If git fails, return an empty string.
+    Return empty string if git fails.
     """
     try:
         result = subprocess.run(
@@ -61,11 +60,11 @@ def clean_text(text):
 
 def extract_title(xml_file):
     """
-    Return the document title from xml_file.
+    Return the document title from xml_file:
 
-    1. Scan every element for <article> or <module> and return its name.
+    1. Scan every element for <article> or <module> and grab its name.
     2. If none, regex raw text for name="...".
-    Finally, clean whitespace and HTML entities.
+    Then clean whitespace and HTML entities.
     """
     try:
         tree = ET.parse(xml_file)
@@ -78,7 +77,7 @@ def extract_title(xml_file):
     except ET.ParseError:
         pass
 
-    # fallback to regex
+    # fallback to regex on raw text
     try:
         text = open(xml_file, encoding="utf-8").read()
         match = re.search(
@@ -93,10 +92,20 @@ def extract_title(xml_file):
     return ""
 
 
+def make_link(rel_path):
+    """
+    Turn a relative xml path into the public HTML link:
+      xml/en/docs/foo.xml → https://nginx.org/en/docs/foo.html
+    """
+    # remove leading 'xml/' and swap extension
+    web_path = rel_path[len("xml/"):].replace(".xml", ".html")
+    return f"https://nginx.org/{web_path}"
+
+
 def build_inventory(repo_path):
     """
     Scan xml/<lang>/docs for each language. Return a dict:
-      { lang: [{file, title, last_commit}, …] }
+      { lang: [ {file, title, link, last_commit}, ... ] }
     """
     data = {}
 
@@ -118,6 +127,7 @@ def build_inventory(repo_path):
                 records.append({
                     "file": rel,
                     "title": extract_title(full),
+                    "link": make_link(rel),
                     "last_commit": get_last_commit_date(repo_path, rel),
                 })
 
@@ -128,27 +138,26 @@ def build_inventory(repo_path):
 
 def write_to_excel(data_dict, output_file):
     """
-    Write sheets per language and then auto-fit columns.
+    Write the inventory to an Excel workbook:
+    • one sheet per language code
+    • columns: file, title, link, last commit
+    • auto-fit each column
     """
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-        # write each sheet
         for lang, records in data_dict.items():
             df = pd.DataFrame(records)
             df = df.rename(columns={"last_commit": "last commit"})
-            df = df[["file", "title", "last commit"]]
+            # ensure column order
+            df = df[["file", "title", "link", "last commit"]]
             df.to_excel(writer, sheet_name=lang, index=False)
 
-        # auto-fit columns on each sheet
+        # auto-fit columns
         workbook = writer.book
         for sheet in workbook.worksheets:
-            for col_cells in sheet.columns:
-                # determine the maximum length in this column
-                max_len = max(
-                    len(str(cell.value or "")) for cell in col_cells
-                )
-                col_letter = get_column_letter(col_cells[0].column)
-                # add a little extra space
-                sheet.column_dimensions[col_letter].width = max_len + 2
+            for col in sheet.columns:
+                max_len = max(len(str(cell.value or "")) for cell in col)
+                letter = get_column_letter(col[0].column)
+                sheet.column_dimensions[letter].width = max_len + 2
 
     print(f"inventory written to {output_file}")
 
@@ -159,11 +168,11 @@ def main():
     )
     parser.add_argument(
         "--repo-path", default=".",
-        help="root of the cloned nginx.org repo"
+        help="path to the root of your nginx.org clone"
     )
     parser.add_argument(
         "--output", default="nginx_docs_inventory.xlsx",
-        help="Excel file name to create"
+        help="Excel file to create"
     )
     args = parser.parse_args()
 
