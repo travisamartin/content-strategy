@@ -11,7 +11,7 @@ This script finds and replaces `<span>` tags with Markdown bold in your `.md` fi
 
 1. Save the script as `fix_spans.py`.  
 2. (Optional) Make it executable:
-3. 
+   
    ```shell
    chmod +x fix_spans.py
    ```
