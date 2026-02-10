@@ -12,9 +12,9 @@ import pandas as pd
 DROP_COLUMNS = [
     "A", "B", "C", "D", "E", "F", "G",
     "I", "J", "K", "L", "M",
-    "P", "Q", "R",
+    "P", "Q", "R", "U",
     "V", "W", "X", "Y", "Z",
-    "AD",
+    "AD", "AE", "AF",
 ]
 
 
