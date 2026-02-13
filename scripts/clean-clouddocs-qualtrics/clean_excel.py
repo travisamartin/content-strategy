@@ -12,9 +12,9 @@ import pandas as pd
 DROP_COLUMNS = [
     "A", "B", "C", "D", "E", "F", "G",
     "I", "J", "K", "L", "M",
-    "P", "Q", "R", "U",
+    "P", "Q", "R",
     "V", "W", "X", "Y", "Z",
-    "AD", "AE", "AF",
+    "AD",
 ]
 
 
@@ -44,21 +44,20 @@ def main():
     # Drop the sub-header row (first data row).
     df = df.iloc[1:].reset_index(drop=True)
 
-    # Recode values in what is now column D (originally column S).
+    # Recode values in Q1 (originally column S).
     # 10 -> 1, 11 -> 2, ..., 16 -> 7
     recode_map = {10: 1, 11: 2, 12: 3, 13: 4, 14: 5, 15: 6, 16: 7}
-    col_d = df.columns[3]  # 0-indexed, so index 3 = column D
-    df[col_d] = pd.to_numeric(df[col_d], errors="coerce")
-    df[col_d] = df[col_d].map(recode_map).fillna(df[col_d])
-    df[col_d] = df[col_d].astype("Int64")  # nullable integer type
+    df["Q1"] = pd.to_numeric(df["Q1"], errors="coerce")
+    df["Q1"] = df["Q1"].map(recode_map).fillna(df["Q1"])
+    df["Q1"] = df["Q1"].astype("Int64")  # nullable integer type
 
-    # Clean URLs in column G: strip everything from the first ? or #.
-    col_g = df.columns[6]  # 0-indexed, so index 6 = column G
-    df[col_g] = df[col_g].astype(str).str.split(r"[?#]").str[0]
-    df[col_g] = df[col_g].str.replace("https://clouddocs.f5.com/", "", regex=False)
-    df[col_g] = df[col_g].str.replace(".html", "", regex=False)
-    df[col_g] = df[col_g].str.rstrip("/")
-    df[col_g] = df[col_g].replace("nan", pd.NA)
+    # Clean URLs in the current_url column: strip everything from the first ? or #.
+    col_url = "current_url"
+    df[col_url] = df[col_url].astype(str).str.split(r"[?#]").str[0]
+    df[col_url] = df[col_url].str.replace("https://clouddocs.f5.com/", "", regex=False)
+    df[col_url] = df[col_url].str.replace(".html", "", regex=False)
+    df[col_url] = df[col_url].str.rstrip("/")
+    df[col_url] = df[col_url].replace("nan", pd.NA)
 
     df.to_excel(args.output_file, index=False)
     print(f"Wrote {len(df)} rows x {len(df.columns)} columns to {args.output_file}")
