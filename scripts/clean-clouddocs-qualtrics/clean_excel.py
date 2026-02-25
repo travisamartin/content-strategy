@@ -27,6 +27,8 @@ def col_letter_to_index(letter: str) -> int:
 
 
 def main():
+    pd.set_option('future.no_silent_downcasting', True)
+
     parser = argparse.ArgumentParser(description="Clean Excel export for Tableau.")
     parser.add_argument("input_file", help="Path to the input Excel file")
     parser.add_argument("output_file", help="Path for the output Excel file")
@@ -47,17 +49,17 @@ def main():
     # Recode values in Q1 (originally column S).
     # 10 -> 1, 11 -> 2, ..., 16 -> 7
     recode_map = {10: 1, 11: 2, 12: 3, 13: 4, 14: 5, 15: 6, 16: 7}
-    df["Q1"] = pd.to_numeric(df["Q1"], errors="coerce")
-    df["Q1"] = df["Q1"].map(recode_map).fillna(df["Q1"])
-    df["Q1"] = df["Q1"].astype("Int64")  # nullable integer type
+    df.loc[:, "Q1"] = pd.to_numeric(df["Q1"], errors="coerce")
+    df.loc[:, "Q1"] = df["Q1"].map(recode_map).fillna(df["Q1"]).infer_objects(copy=False)
+    df.loc[:, "Q1"] = df["Q1"].astype("Int64")  # nullable integer type
 
     # Clean URLs in the current_url column: strip everything from the first ? or #.
     col_url = "current_url"
-    df[col_url] = df[col_url].astype(str).str.split(r"[?#]").str[0]
-    df[col_url] = df[col_url].str.replace("https://clouddocs.f5.com/", "", regex=False)
-    df[col_url] = df[col_url].str.replace(".html", "", regex=False)
-    df[col_url] = df[col_url].str.rstrip("/")
-    df[col_url] = df[col_url].replace("nan", pd.NA)
+    df.loc[:, col_url] = df[col_url].astype(str).str.split(r"[?#]").str[0]
+    df.loc[:, col_url] = df[col_url].str.replace("https://clouddocs.f5.com/", "", regex=False)
+    df.loc[:, col_url] = df[col_url].str.replace(".html", "", regex=False)
+    df.loc[:, col_url] = df[col_url].str.rstrip("/")
+    df.loc[:, col_url] = df[col_url].replace("nan", pd.NA)
 
     df.to_excel(args.output_file, index=False)
     print(f"Wrote {len(df)} rows x {len(df.columns)} columns to {args.output_file}")
