@@ -73,11 +73,11 @@ def build_ai_dataset(input_path: Path, output_path: Path) -> None:
         raise ValueError(f"Missing required column(s): {missing}")
 
     slim = df[[URL_COL, Q1_COL, Q2_COL, DATE_COL]].copy()
-    slim["Date"] = pd.to_datetime(slim[DATE_COL], errors="coerce")
+    slim.loc[:, "Date"] = pd.to_datetime(slim[DATE_COL], errors="coerce")
     slim = slim.dropna(subset=["Date", Q1_COL])
 
-    slim[URL_COL] = slim[URL_COL].astype(str).str.strip()
-    slim["Product"] = slim[URL_COL].apply(map_product)
+    slim.loc[:, URL_COL] = slim[URL_COL].astype(str).str.strip()
+    slim.loc[:, "Product"] = slim[URL_COL].apply(map_product)
 
     grouped = (
         slim.groupby([URL_COL, "Product"], dropna=False)
@@ -89,7 +89,7 @@ def build_ai_dataset(input_path: Path, output_path: Path) -> None:
             .reset_index()
     )
 
-    grouped["avg_q1"] = grouped["avg_q1"].round(2)
+    grouped.loc[:, "avg_q1"] = grouped["avg_q1"].round(2)
 
     grouped.to_excel(output_path, index=False)
     print(f"✔ File created: {output_path}")

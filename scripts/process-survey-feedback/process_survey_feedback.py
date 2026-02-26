@@ -229,11 +229,11 @@ def apply_redirect_mappings_in_place(df: pd.DataFrame, mappings: List[Tuple[str,
         return df
 
     if "Original Link URL" not in df.columns:
-        df["Original Link URL"] = df["Link URL"]
+        df.loc[:, "Original Link URL"] = df["Link URL"]
 
     # Normalize Link URL and strip nginx vars first
-    df["Link URL"] = df["Link URL"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
-    df["Link URL"] = df["Link URL"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
+    df.loc[:, "Link URL"] = df["Link URL"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
+    df.loc[:, "Link URL"] = df["Link URL"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
 
     def map_one(url: str | None) -> str | None:
         if not isinstance(url, str):
@@ -245,7 +245,7 @@ def apply_redirect_mappings_in_place(df: pd.DataFrame, mappings: List[Tuple[str,
                 return mapped
         return strip_nginx_vars_from_url(url) or url
 
-    df["Canonical Link URL"] = df["Link URL"].apply(map_one)
+    df.loc[:, "Canonical Link URL"] = df["Link URL"].apply(map_one)
 
     changed_mask = (df["Canonical Link URL"].notna()) & (df["Link URL"].notna()) & (df["Canonical Link URL"] != df["Link URL"])
     changed = df[changed_mask]
@@ -254,7 +254,7 @@ def apply_redirect_mappings_in_place(df: pd.DataFrame, mappings: List[Tuple[str,
     logging.info(f"Total URLs canonicalized via redirect file: {changed.shape[0]}")
 
     # Replace Link URL with canonical
-    df["Link URL"] = df["Canonical Link URL"]
+    df.loc[:, "Link URL"] = df["Canonical Link URL"]
     return df
 
 
@@ -349,7 +349,7 @@ def exclude_bogus_responses(df: pd.DataFrame, exclude_file: str) -> pd.DataFrame
         logging.error("ResponseId column not found. Skipping exclude.")
         return df
 
-    df["ResponseId"] = df["ResponseId"].astype(str).str.strip()
+    df.loc[:, "ResponseId"] = df["ResponseId"].astype(str).str.strip()
     before = df.shape[0]
     to_remove_df = df[df["ResponseId"].isin(exclude_ids)]
     removed_ids = sorted(to_remove_df["ResponseId"].unique())
@@ -381,11 +381,10 @@ def scrub_emails_in_q2(df: pd.DataFrame) -> pd.DataFrame:
                 logging.info(f"Row {idx}: Removed {count} email(s) from Q2.")
                 # collapse extra spaces and trim
                 new_cell = re.sub(r"\s{2,}", " ", new_cell).strip()
-                # If the remaining text is empty, return empty string per requirement
                 return new_cell
         return cell
 
-    df["Q2"] = df.apply(lambda r: scrub_cell(r["Q2"], r.name), axis=1)
+    df.loc[:, "Q2"] = df.apply(lambda r: scrub_cell(r["Q2"], r.name), axis=1)
     return df
 
 
@@ -395,17 +394,17 @@ def clean_link_urls(df: pd.DataFrame) -> pd.DataFrame:
     Remove query strings and fragments, fix malformed URLs, strip nginx tokens.
     """
     if "Link URL" in df.columns and "Original Link URL" not in df.columns:
-        df["Original Link URL"] = df["Link URL"]
+        df.loc[:, "Original Link URL"] = df["Link URL"]
     if "current_url" in df.columns and "Original current_url" not in df.columns:
-        df["Original current_url"] = df["current_url"]
+        df.loc[:, "Original current_url"] = df["current_url"]
 
     if "Link URL" in df.columns:
-        df["Link URL"] = df["Link URL"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
-        df["Link URL"] = df["Link URL"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
+        df.loc[:, "Link URL"] = df["Link URL"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
+        df.loc[:, "Link URL"] = df["Link URL"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
 
     if "current_url" in df.columns:
-        df["current_url"] = df["current_url"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
-        df["current_url"] = df["current_url"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
+        df.loc[:, "current_url"] = df["current_url"].apply(lambda u: ensure_absolute_and_normalize(u) if isinstance(u, str) else None)
+        df.loc[:, "current_url"] = df["current_url"].apply(lambda u: strip_nginx_vars_from_url(u) if isinstance(u, str) else u)
 
     logging.info("URLs normalized and sanitized (removed query/fragment and nginx tokens).")
     return df
@@ -530,7 +529,7 @@ def reverse_geocode_country_only(
             continue
         key = f"{rlat},{rlon}"
         country_col.append(cache.get(key))
-    df["Country"] = country_col
+    df.loc[:, "Country"] = country_col
     logging.info("Added 'Country' column from reverse geocoding results.")
     return df
 
