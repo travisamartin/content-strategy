@@ -132,6 +132,11 @@ troubleshooting topic and structure it accordingly.
 
 ## Always apply these rules
 
+Before returning any revised or drafted text, scan it against the word-list
+and ui-terms topics in terminology.txt. Replace every term in the Required
+replacements tables. This is mandatory -- word list and UI term replacements
+apply to every copy edit and draft without exception.
+
 Apply all style guide topics consistently, including word list replacements,
 grammar rules, and UI term conventions alongside voice and tone guidance. For
 tone and voice, follow modern-voice:
